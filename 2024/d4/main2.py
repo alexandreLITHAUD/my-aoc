@@ -4,29 +4,20 @@ import os
 def how_many_xmas(grid, x, y):
     count = 0
 
-    # RIGHT
-    if x+3 < len(grid) and grid[x+1][y] == 'M' and grid[x+2][y] == 'A' and grid[x+3][y] == 'S':
+    if x == 0 or x == len(grid)-1:
+        return 0
+
+    # CROSS M M
+    if x-1 >= 0 and x+1 < len(grid) and y-1 >= 0 and y+1 < len(grid[0]) and grid[x-1][y-1] == 'M' and grid[x+1][y-1] == 'M' and grid[x-1][y+1] == 'S' and grid[x+1][y+1] == 'S':
+        count += 1        
+    # CROSS M S
+    if x-1 >= 0 and x+1 < len(grid) and y-1 >= 0 and y+1 < len(grid[0]) and grid[x-1][y-1] == 'M' and grid[x+1][y-1] == 'S' and grid[x-1][y+1] == 'M' and grid[x+1][y+1] == 'S':
         count += 1
-    # LEFT
-    if x-3 >= 0 and grid[x-1][y] == 'M' and grid[x-2][y] == 'A' and grid[x-3][y] == 'S':
+    # CROSS S S
+    if x-1 >= 0 and x+1 < len(grid) and y-1 >= 0 and y+1 < len(grid[0]) and grid[x-1][y-1] == 'S' and grid[x+1][y-1] == 'S' and grid[x-1][y+1] == 'M' and grid[x+1][y+1] == 'M':
         count += 1
-    # UP
-    if y-3 >= 0 and grid[x][y-1] == 'M' and grid[x][y-2] == 'A' and grid[x][y-3] == 'S':
-        count += 1
-    # DOWN
-    if y+3 < len(grid[0]) and grid[x][y+1] == 'M' and grid[x][y+2] == 'A' and grid[x][y+3] == 'S':
-        count += 1
-    # UP-RIGHT
-    if x+3 < len(grid) and y-3 >= 0 and grid[x+1][y-1] == 'M' and grid[x+2][y-2] == 'A' and grid[x+3][y-3] == 'S':
-        count += 1
-    # UP-LEFT
-    if x-3 >= 0 and y-3 >= 0 and grid[x-1][y-1] == 'M' and grid[x-2][y-2] == 'A' and grid[x-3][y-3] == 'S':
-        count += 1
-    # DOWN-RIGHT
-    if x+3 < len(grid) and y+3 < len(grid[0]) and grid[x+1][y+1] == 'M' and grid[x+2][y+2] == 'A' and grid[x+3][y+3] == 'S':
-        count += 1
-    # DOWN-LEFT
-    if x-3 >= 0 and y+3 < len(grid[0]) and grid[x-1][y+1] == 'M' and grid[x-2][y+2] == 'A' and grid[x-3][y+3] == 'S':
+    # CROSS S M
+    if x-1 >= 0 and x+1 < len(grid) and y-1 >= 0 and y+1 < len(grid[0]) and grid[x-1][y-1] == 'S' and grid[x+1][y-1] == 'M' and grid[x-1][y+1] == 'S' and grid[x+1][y+1] == 'M':
         count += 1
 
     return count
@@ -36,7 +27,7 @@ def search_grid(grid):
 
     for i in range(len(grid)):
         for j in range(len(grid[i])):
-            if grid[i][j] == 'X':
+            if grid[i][j] == 'A':
                 count += how_many_xmas(grid, i, j)
     return count
 
