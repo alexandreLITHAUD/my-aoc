@@ -11,16 +11,20 @@ def find_antinodes(args):
             if freq_coord != coord:
                 # First direction (freq_coord -> coord)
                 vector = (coord[0] - freq_coord[0], coord[1] - freq_coord[1])
-                antinode = (coord[0] + vector[0], coord[1] + vector[1])
-                if (0 <= antinode[0] < len(map_data) and 
-                    0 <= antinode[1] < len(map_data[0])):
-                    found_antinodes.add(antinode)
                 
+                # REDONCENCY UP
+                antinode = (coord[0] + vector[0], coord[1] + vector[1])
+                while(0 <= antinode[0] < len(map_data) and 0 <= antinode[1] < len(map_data[0])):
+                    found_antinodes.add(antinode)
+                    antinode = (antinode[0] + vector[0], antinode[1] + vector[1])
+                
+                # REDONCENCY DOWN
+
                 # Second direction (coord -> freq_coord)
                 antinode = (freq_coord[0] - vector[0], freq_coord[1] - vector[1])
-                if (0 <= antinode[0] < len(map_data) and 
-                    0 <= antinode[1] < len(map_data[0])):
+                while(0 <= antinode[0] < len(map_data) and 0 <= antinode[1] < len(map_data[0])):
                     found_antinodes.add(antinode)
+                    antinode = (antinode[0] - vector[0], antinode[1] - vector[1])
     
     return found_antinodes
 
