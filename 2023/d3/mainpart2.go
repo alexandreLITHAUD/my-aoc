@@ -1,0 +1,159 @@
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"unicode"
+)
+
+type Number struct {
+	Value    int
+	Row      int
+	StartCol int
+	EndCol   int
+}
+
+type Symbol struct {
+	Value rune
+	Row   int
+	Col   int
+}
+
+func parseGridFromFile(filename string) ([][]rune, []Number, []Symbol, error) {
+	// Open the file
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("error opening file: %w", err)
+	}
+	defer file.Close()
+
+	// Read the file line by line
+	var grid [][]rune
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		grid = append(grid, []rune(line))
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, nil, nil, fmt.Errorf("error reading file: %w", err)
+	}
+
+	// Extract numbers and symbols
+	var numbers []Number
+	var symbols []Symbol
+
+	for row, line := range grid {
+		var currentNum string
+		var startCol int
+
+		for col, char := range line {
+			if unicode.IsDigit(char) {
+				if currentNum == "" {
+					startCol = col
+				}
+				currentNum += string(char)
+			} else {
+				// If we've been building a number and found a non-digit
+				if currentNum != "" {
+					val := 0
+					fmt.Sscanf(currentNum, "%d", &val)
+					numbers = append(numbers, Number{
+						Value:    val,
+						Row:      row,
+						StartCol: startCol,
+						EndCol:   col - 1,
+					})
+					currentNum = ""
+				}
+
+				// Check if it's a symbol (not a dot)
+				if char != '.' {
+					symbols = append(symbols, Symbol{
+						Value: char,
+						Row:   row,
+						Col:   col,
+					})
+				}
+			}
+		}
+
+		// Check if we have a number at the end of the line
+		if currentNum != "" {
+			val := 0
+			fmt.Sscanf(currentNum, "%d", &val)
+			numbers = append(numbers, Number{
+				Value:    val,
+				Row:      row,
+				StartCol: startCol,
+				EndCol:   len(line) - 1,
+			})
+		}
+	}
+
+	return grid, numbers, symbols, nil
+}
+
+// Example function to find if a number is adjacent to any symbol
+func isAdjacentToSymbol(num Number, symbols []Symbol, gridHeight, gridWidth int) bool {
+	// Check all surrounding cells
+	for r := max(0, num.Row-1); r <= min(gridHeight-1, num.Row+1); r++ {
+		for c := max(0, num.StartCol-1); c <= min(gridWidth-1, num.EndCol+1); c++ {
+			// Skip positions that are part of the number itself
+			if r == num.Row && c >= num.StartCol && c <= num.EndCol {
+				continue
+			}
+
+			// Check if any symbol is at this position
+			for _, sym := range symbols {
+				if sym.Row == r && sym.Col == c {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+func main() {
+	if len(os.Args) < 2 {
+		fmt.Println("Usage: go run main.go <input_file>")
+		os.Exit(1)
+	}
+
+	inputFile := os.Args[1]
+	grid, numbers, symbols, err := parseGridFromFile(inputFile)
+	if err != nil {
+		fmt.Printf("Error parsing grid: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Println("Grid dimensions:", len(grid), "x", len(grid[0]))
+
+	// Example usage: find numbers adjacent to any symbol
+	fmt.Println("\nNumbers adjacent to symbols:")
+	sum := 0
+	for _, num := range numbers {
+		if isAdjacentToSymbol(num, symbols, len(grid), len(grid[0])) {
+			fmt.Printf("Number %d at (%d, %d-%d) is adjacent to a symbol\n",
+				num.Value, num.Row, num.StartCol, num.EndCol)
+			sum += num.Value
+		}
+	}
+	fmt.Println("Sum of numbers adjacent to symbols:", sum)
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
