@@ -16,7 +16,9 @@ type Card struct {
 	instance      uint16
 }
 
-func UpdateInstance(index uint16, c *Card, cards map[uint16]*Card) {
+func UpdateInstance(index uint16, cards map[uint16]*Card) {
+
+	c := cards[index]
 
 	var somme uint8 = 0
 	for _, num := range c.winninNumbers {
@@ -25,10 +27,11 @@ func UpdateInstance(index uint16, c *Card, cards map[uint16]*Card) {
 		}
 	}
 
-	for i := 0; i < int(somme); i++ {
-		newindex := uint16(int(index) + 1 + i)
-		newinstance := uint16(c.instance)
-		cards[newindex].instance += newinstance
+	for i := uint8(0); i < somme; i++ {
+		newIndex := index + 1 + uint16(i)
+		if nextCard, exists := cards[newIndex]; exists {
+			nextCard.instance += c.instance
+		}
 	}
 
 }
@@ -101,8 +104,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	for i, card := range cards {
-		UpdateInstance(i+1, card, cards)
+	for i, _ := range cards {
+		UpdateInstance(i+1, cards)
 	}
 
 	var sum uint16
